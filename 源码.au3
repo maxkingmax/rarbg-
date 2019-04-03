@@ -1,4 +1,5 @@
-﻿#Region
+
+#Region
 #AccAu3Wrapper_Icon=										 ;程序图标
 #AccAu3Wrapper_UseX64=n										 ;是否编译为64位程序(y/n)
 #AccAu3Wrapper_OutFile=										 ;输出的Exe名称
@@ -46,56 +47,22 @@ If StringInStr($input, " ") Then
 EndIf
 
 $ofile = FileOpen("magnet.txt", 1 + 8)
-Local $oIE = _IECreate("https://rarbgprx.org/torrents.php?search=" & $input & "&category=4&page=1")
+$iii = 1
+$v = 1
+$total = 0
+FileWriteLine($ofile, "<------" & $input & "------")
 
-Local $oLinks = _IELinkGetCollection($oIE)
-
-Local $iNumLinks = @extended
-
-Local $sTxt = $iNumLinks & " links found" & @CRLF & @CRLF
-Local $ljsz[$iNumLinks + 1]
-$ljsz[0] = $iNumLinks
-$i = 1
-For $oLink In $oLinks
-	$ljsz[$i] = $oLink.href
-	$i += 1
-Next
-;~ _ArrayDisplay($ljsz)
-;~ _FileWriteFromArray("1.txt", $ljsz)
-$a = _ArrayToString($ljsz, @CR)
-;~ _IEQuit($oIE)
-
-
-;~ MsgBox(0, "", $a)
-
-
-$array = StringRegExp($a, ".+&page=[0-9]\r", 3)
-$array2 = StringRegExp($a, ".+\/torrent\/[a-z,0-9]{7}\r", 3)
-$narray = _ArrayUnique($array)
-
-_ArrayDisplay($narray)
-;~ _ArrayDisplay($array2)
+While 1
 
 
 
-For $i = 7 To UBound($array2) - 1
-	Local $oIE = _IECreate($array2[$i], 1, 0, 1, 0)
-	Local $sHTML = _IEBodyReadHTML($oIE)
-;~ MsgBox(0,"",$sHTML)
-	$mag = StringRegExp($sHTML, "magnet\:\?xt\=urn\:btih\:[0-9,a-z,A-Z]{40}", 2)
-	_IEQuit($oIE)
-	_FileWriteFromArray($ofile, $mag)
-Next
-
-
-For $b = 1 To $narray[0]
-	Local $oIE = _IECreate($narray[$b], 1, 0, 1, 0)
+	Local $oIE = _IECreate("https://rarbgprx.org/torrents.php?search=" & $input & "&category=4&page=" & $iii, 1, $v, 1, 0)
 
 	Local $oLinks = _IELinkGetCollection($oIE)
 
 	Local $iNumLinks = @extended
 
-	Local $sTxt = $iNumLinks & " links found" & @CRLF & @CRLF
+;~ 	Local $sTxt = $iNumLinks & " links found" & @CRLF & @CRLF
 	Local $ljsz[$iNumLinks + 1]
 	$ljsz[0] = $iNumLinks
 	$i = 1
@@ -109,72 +76,52 @@ For $b = 1 To $narray[0]
 ;~ _IEQuit($oIE)
 
 
-;~ 	MsgBox(0, "", $a)
+;~ MsgBox(0, "", $a)
+
+
+;~ 	$array = StringRegExp($a, ".+&page=[0-9]\r", 3)
 	$array2 = StringRegExp($a, ".+\/torrent\/[a-z,0-9]{7}\r", 3)
-	If $b = 8 Then
-		$array = StringRegExp($a, ".+&page=[0-9]{2}\r", 3)
+;~ 	$narray = _ArrayUnique($array)
+	$array2 = _ArrayUnique($array2)
+;~ 	_ArrayDisplay($narray)
+;~ 	_ArrayDisplay($array2)
+	If $array2[0] = 8 Then
 		
-		$narray2 = _ArrayUnique($array)
-
-		_ArrayDisplay($narray2)
-;~ _ArrayDisplay($array2)
-	EndIf
-
-	
-	For $i = 7 To UBound($array2) - 1
-		Local $oIE = _IECreate($array2[$i], 1, 0, 1, 0)
-		Local $sHTML = _IEBodyReadHTML($oIE)
-;~ MsgBox(0,"",$sHTML)
-		$mag = StringRegExp($sHTML, "magnet\:\?xt\=urn\:btih\:[0-9,a-z,A-Z]{40}", 2)
 		_IEQuit($oIE)
-		_FileWriteFromArray($ofile, $mag)
-	Next
-
-Next
-
-
-If IsArray($narray2) Then
-	For $c = 1 To $narray2[0]
-		Local $oIE = _IECreate($narray2[$c], 1, 0, 1, 0)
-
-		Local $oLinks = _IELinkGetCollection($oIE)
-
-		Local $iNumLinks = @extended
-
-		Local $sTxt = $iNumLinks & " links found" & @CRLF & @CRLF
-		Local $ljsz[$iNumLinks + 1]
-		$ljsz[0] = $iNumLinks
-		$i = 1
-		For $oLink In $oLinks
-			$ljsz[$i] = $oLink.href
-			$i += 1
-		Next
-;~ _ArrayDisplay($ljsz)
-;~ _FileWriteFromArray("1.txt", $ljsz)
-		$a = _ArrayToString($ljsz, @CR)
-;~ _IEQuit($oIE)
-
-
-;~ 	MsgBox(0, "", $a)
-		$array2 = StringRegExp($a, ".+\/torrent\/[a-z,0-9]{7}\r", 3)
+		FileClose($ofile)
+		TrayTip("结果：", "未搜索到任何结果。", 5)
+		Sleep(5000)
+		Exit
 		
+		
+		
+		
+	Else
 
-		$ofile = FileOpen("magnet.txt", 1 + 8)
-		For $i = 7 To UBound($array2) - 1
+		For $i = 9 To $array2[0]
 			Local $oIE = _IECreate($array2[$i], 1, 0, 1, 0)
 			Local $sHTML = _IEBodyReadHTML($oIE)
 ;~ MsgBox(0,"",$sHTML)
 			$mag = StringRegExp($sHTML, "magnet\:\?xt\=urn\:btih\:[0-9,a-z,A-Z]{40}", 2)
 			_IEQuit($oIE)
 			_FileWriteFromArray($ofile, $mag)
+;~ 			_ArrayDisplay($mag)
+			Sleep(1000)
+			If Not IsArray($mag) Then TrayTip("警告！","可能服务器开启了保护机制，请关闭程序，稍候重试！",5)
 		Next
+		$total = $total + UBound($mag)
+		$iii += 1
+		$v = 0
+	EndIf
+	
+WEnd
 
-	Next
 
 
-EndIf
-
-
-
-
+_IEQuit($oIE)
+FileWriteLine($ofile, "------ " & $total & " ------>")
 FileClose($ofile)
+TrayTip("结果：", "共抓取到 " & $total & " 个磁力链接。", 5)
+
+Sleep(8000)
+
