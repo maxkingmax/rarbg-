@@ -38,16 +38,27 @@
 #include <Array.au3>
 #include <IE.au3>
 #include <File.au3>
+$magfile = @ScriptDir & "\magnet.txt"
+$errorfile = @ScriptDir & "\error.tmp"
+If FileExists($errorfile) Then
+	$iii = IniRead($errorfile, "error", "page", 1)
+	$input1 = IniRead($errorfile, "error", "key", "")
+Else
 
-$input = InputBox("输入关键字", "请在下框输入要搜索的关键字:", "blacked 2160p", "", 320, 150)
-If @error <> 0 Then Exit
+	$input1 = InputBox("输入关键字", "请在下框输入要搜索的关键字:", "blacked 2160p", "", 320, 150)
+	If @error <> 0 Then Exit
 
-If StringInStr($input, " ") Then
-	$input = StringReplace($input, " ", "+")
+
+	$iii = 1
 EndIf
 
-$ofile = FileOpen("magnet.txt", 1 + 8)
-$iii = 1
+
+If StringInStr($input1, " ") Then
+	$input = StringReplace($input1, " ", "+")
+EndIf
+
+$ofile = FileOpen($magfile, 1 + 8)
+
 $v = 1
 $total = 0
 FileWriteLine($ofile, "<------" & $input & "------")
@@ -107,7 +118,15 @@ While 1
 			_FileWriteFromArray($ofile, $mag)
 ;~ 			_ArrayDisplay($mag)
 			Sleep(1000)
-			If Not IsArray($mag) Then TrayTip("警告！","可能服务器开启了保护机制，请关闭程序，稍候重试！",5)
+			If Not IsArray($mag) Then
+				TrayTip("警告！", "可能服务器开启了保护机制，请关闭程序，稍候重试！", 5)
+				IniWrite($errorfile, "error", "page", $iii)
+				IniWrite($errorfile, "error", "key", $input1)
+				FileWriteLine($ofile, "------ " & $total & " ------>")
+				Sleep(5000)
+				Exit
+			EndIf
+			
 		Next
 		$total = $total + UBound($mag)
 		$iii += 1
@@ -122,6 +141,6 @@ _IEQuit($oIE)
 FileWriteLine($ofile, "------ " & $total & " ------>")
 FileClose($ofile)
 TrayTip("结果：", "共抓取到 " & $total & " 个磁力链接。", 5)
-
+If FileExists($errorfile) Then FileDelete($errorfile)
 Sleep(8000)
 
