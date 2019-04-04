@@ -99,16 +99,18 @@ While 1
 	If $array2[0] = 8 Then
 		
 		_IEQuit($oIE)
+		FileWriteLine($ofile, "------共 " & $total & " 条------>")
 		FileClose($ofile)
-		TrayTip("结果：", "未搜索到任何结果。", 5)
-		Sleep(5000)
+		TrayTip("结果：", "共抓取到 " & $total & " 个磁力链接。", 5)
+		If FileExists($errorfile) Then FileDelete($errorfile)
+		Sleep(8000)
 		Exit
 		
 		
 		
 		
 	Else
-
+		TraySetToolTip('正在处理第 ' & $iii & ' 页的数据。')
 		For $i = 9 To $array2[0]
 			Local $oIE = _IECreate($array2[$i], 1, 0, 1, 0)
 			Local $sHTML = _IEBodyReadHTML($oIE)
@@ -122,25 +124,20 @@ While 1
 				TrayTip("警告！", "可能服务器开启了保护机制，请关闭程序，稍候重试！", 5)
 				IniWrite($errorfile, "error", "page", $iii)
 				IniWrite($errorfile, "error", "key", $input1)
-				FileWriteLine($ofile, "------ " & $total & " ------>")
+				FileWriteLine($ofile, "------第 " & $iii & " 页未完------>")
 				Sleep(5000)
 				Exit
 			EndIf
 			
 		Next
-		$total = $total + UBound($mag)
+		$total = $total + ($array2[0] - 8)
 		$iii += 1
 		$v = 0
+		FileWriteLine($ofile, "------第 " & $iii - 1 & " 页------>")
 	EndIf
 	
 WEnd
 
 
 
-_IEQuit($oIE)
-FileWriteLine($ofile, "------ " & $total & " ------>")
-FileClose($ofile)
-TrayTip("结果：", "共抓取到 " & $total & " 个磁力链接。", 5)
-If FileExists($errorfile) Then FileDelete($errorfile)
-Sleep(8000)
 
