@@ -55,6 +55,8 @@ EndIf
 
 If StringInStr($input1, " ") Then
 	$input = StringReplace($input1, " ", "+")
+Else
+	$input = $input1
 EndIf
 
 $ofile = FileOpen($magfile, 1 + 8)
@@ -119,7 +121,7 @@ While 1
 			_IEQuit($oIE)
 			_FileWriteFromArray($ofile, $mag)
 ;~ 			_ArrayDisplay($mag)
-			Sleep(1000)
+			Sleep(2000)
 			If Not IsArray($mag) Then
 				TrayTip("警告！", "可能服务器开启了保护机制，请关闭程序，稍候重试！", 5)
 				IniWrite($errorfile, "error", "page", $iii)
